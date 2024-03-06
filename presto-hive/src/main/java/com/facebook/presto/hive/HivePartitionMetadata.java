@@ -71,4 +71,10 @@ public class HivePartitionMetadata
     {
         return redundantColumnDomains;
     }
+
+    public Optional<byte[]> getRowIdPartitionComponent()
+    {
+        // TODO set this
+        return Optional.empty();
+    }
 }
