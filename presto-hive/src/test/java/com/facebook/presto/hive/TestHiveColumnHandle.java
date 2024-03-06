@@ -23,6 +23,8 @@ import static com.facebook.presto.common.type.TypeSignature.parseTypeSignature;
 import static com.facebook.presto.hive.BaseHiveColumnHandle.ColumnType.PARTITION_KEY;
 import static com.facebook.presto.hive.BaseHiveColumnHandle.ColumnType.REGULAR;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class TestHiveColumnHandle
 {
@@ -33,6 +35,22 @@ public class TestHiveColumnHandle
     {
         HiveColumnHandle hiddenColumn = HiveColumnHandle.pathColumnHandle();
         testRoundTrip(hiddenColumn);
+    }
+
+    @Test
+    public void testRowIdHiddenColumn()
+    {
+        HiveColumnHandle rowIdColumn = HiveColumnHandle.rowIdColumnHandle();
+        testRoundTrip(rowIdColumn);
+    }
+
+    @Test
+    public void testIsRowIdColumnHandle()
+    {
+        HiveColumnHandle rowIdColumn = HiveColumnHandle.rowIdColumnHandle();
+        assertTrue(HiveColumnHandle.isRowIdColumnHandle(rowIdColumn));
+        HiveColumnHandle pathColumn = HiveColumnHandle.pathColumnHandle();
+        assertFalse(HiveColumnHandle.isRowIdColumnHandle(pathColumn));
     }
 
     @Test

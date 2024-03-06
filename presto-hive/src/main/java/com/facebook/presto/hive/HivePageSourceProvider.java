@@ -829,6 +829,7 @@ public class HivePageSourceProvider
                     columnMappings.add(columnMapping);
                     regularIndex++;
                 }
+                // TODO handle ROW_ID here
                 else {
                     columnMappings.add(prefilled(
                             column,
