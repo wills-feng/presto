@@ -16,7 +16,8 @@ RUN cd presto-native-execution && \
     cp _build/debug/presto_cpp/main/presto_server prestissimo && \
     mkdir -p prestissimo/runtime-libraries && \
     ldd _build/debug/presto_cpp/main/presto_server | awk 'NF == 4 { system("cp " $3 " prestissimo/runtime-libraries/") }' && \
-    tar cvf prestissimo.tar entrypoint_debug.sh velox.properties prestissimo
+    tar cvf prestissimo.tar entrypoint_debug.sh velox.properties prestissimo && \
+    make clean
 
 ENV PRESTO_HOME="/opt/presto-server"
 
