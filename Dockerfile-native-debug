@@ -16,8 +16,11 @@ RUN cd presto-native-execution && \
     cp _build/debug/presto_cpp/main/presto_server prestissimo && \
     mkdir -p prestissimo/runtime-libraries && \
     ldd _build/debug/presto_cpp/main/presto_server | awk 'NF == 4 { system("cp " $3 " prestissimo/runtime-libraries/") }' && \
-    tar cvf prestissimo.tar entrypoint_debug.sh velox.properties prestissimo && \
-    make clean
+    tar cvf prestissimo.tar entrypoint_debug.sh velox.properties prestissimo
+
+##
+
+FROM quay.io/centos/centos:stream8
 
 ENV PRESTO_HOME="/opt/presto-server"
 
@@ -42,8 +45,10 @@ RUN dnf update -y && dnf --enablerepo=powertools install -y \
     mkdir -p $PRESTO_HOME/etc/catalog && \
     mkdir -p /var/lib/presto/data
 
-RUN cd presto-native-execution && \
-    tar xvf prestissimo.tar && \
+WORKDIR  /app
+COPY --from=Builder /app/presto-native-execution/prestissimo.tar .
+COPY . .
+RUN tar xvf prestissimo.tar && \
     mkdir -p /opt/presto-server/etc && \
     mv prestissimo/presto_server /usr/local/bin/ && \
     mv velox.properties /opt/presto-server/etc/ && \
