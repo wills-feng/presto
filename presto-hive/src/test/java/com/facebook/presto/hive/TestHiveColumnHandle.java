@@ -22,6 +22,7 @@ import java.util.Optional;
 import static com.facebook.presto.common.type.TypeSignature.parseTypeSignature;
 import static com.facebook.presto.hive.BaseHiveColumnHandle.ColumnType.PARTITION_KEY;
 import static com.facebook.presto.hive.BaseHiveColumnHandle.ColumnType.REGULAR;
+import static com.facebook.presto.hive.BaseHiveColumnHandle.ColumnType.SYNTHESIZED;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -42,6 +43,13 @@ public class TestHiveColumnHandle
     {
         HiveColumnHandle rowIdColumn = HiveColumnHandle.rowIdColumnHandle();
         testRoundTrip(rowIdColumn);
+    }
+
+    @Test
+    public void testRowIdIsSynthesized()
+    {
+        HiveColumnHandle rowIdColumn = HiveColumnHandle.rowIdColumnHandle();
+        assertEquals(rowIdColumn.getColumnType(), SYNTHESIZED);
     }
 
     @Test
