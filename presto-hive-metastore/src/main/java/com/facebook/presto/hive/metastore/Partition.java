@@ -60,35 +60,8 @@ public class Partition
             @JsonProperty("eligibleToIgnore") boolean eligibleToIgnore,
             @JsonProperty("sealedPartition") boolean sealedPartition,
             @JsonProperty("createTime") int createTime,
-            @JsonProperty("lastDataCommitTime") long lastDataCommitTime)
-    {
-        this.databaseName = requireNonNull(databaseName, "databaseName is null");
-        this.tableName = requireNonNull(tableName, "tableName is null");
-        this.values = ImmutableList.copyOf(requireNonNull(values, "values is null"));
-        this.storage = requireNonNull(storage, "storage is null");
-        this.columns = ImmutableList.copyOf(requireNonNull(columns, "columns is null"));
-        this.parameters = ImmutableMap.copyOf(requireNonNull(parameters, "parameters is null"));
-        this.partitionVersion = requireNonNull(partitionVersion, "partitionVersion is null");
-        this.eligibleToIgnore = eligibleToIgnore;
-        this.sealedPartition = sealedPartition;
-        this.createTime = createTime;
-        this.lastDataCommitTime = lastDataCommitTime;
-        this.rowIdPartitionComponent = Optional.empty();
-    }
-
-    public Partition(
-            String databaseName,
-            String tableName,
-            List<String> values,
-            Storage storage,
-            List<Column> columns,
-            Map<String, String> parameters,
-            Optional<Long> partitionVersion,
-            boolean eligibleToIgnore,
-            boolean sealedPartition,
-            int createTime,
-            long lastDataCommitTime,
-            Optional<byte[]> rowIdPartitionComponent)
+            @JsonProperty("lastDataCommitTime") long lastDataCommitTime,
+            @JsonProperty("rowIdPartitionComponent") Optional<byte[]> rowIdPartitionComponent)
     {
         this.databaseName = requireNonNull(databaseName, "databaseName is null");
         this.tableName = requireNonNull(tableName, "tableName is null");
