@@ -80,23 +80,6 @@ public class Partition
         this.rowIdPartitionComponent = rowIdPartitionComponent;
     }
 
-    // TODO inline and/or deprecate
-    public Partition(
-            String databaseName,
-            String tableName,
-            List<String> values,
-            Storage storage,
-            List<Column> columns,
-            Map<String, String> parameters,
-            Optional<Long> partitionVersion,
-            boolean eligibleToIgnore,
-            boolean sealedPartition,
-            int createTime,
-            long lastDataCommitTime)
-    {
-        this(databaseName, tableName, values, storage, columns, parameters, partitionVersion, eligibleToIgnore, sealedPartition, createTime, lastDataCommitTime, Optional.empty());
-    }
-
     @JsonProperty
     public String getDatabaseName()
     {
