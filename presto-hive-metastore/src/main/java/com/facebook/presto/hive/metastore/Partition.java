@@ -71,7 +71,7 @@ public class Partition
         this.parameters = ImmutableMap.copyOf(requireNonNull(parameters, "parameters is null"));
         this.partitionVersion = requireNonNull(partitionVersion, "partitionVersion is null");
         this.eligibleToIgnore = eligibleToIgnore;
-        this.sealedPartition = sealedPartition;
+        this.sealedPartition = sealedPartition; // foo
         this.createTime = createTime;
         this.lastDataCommitTime = lastDataCommitTime;
         if (rowIdPartitionComponent == null) {
