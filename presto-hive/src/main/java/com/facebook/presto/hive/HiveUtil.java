@@ -1153,7 +1153,7 @@ public final class HiveUtil
             if (physicalOrdinal == null) {
                 // if the column is missing from the file, assign it a column number larger than the number of columns in the
                 // file so the reader will fill it with nulls.  If the index is negative, i.e. this is a synthesized column like
-                // a partitioning key, $bucket or $path, leave it as is.
+                // a partitioning key, $bucket, $row_id, or $path, leave it as is.
                 if (column.getHiveColumnIndex() < 0) {
                     physicalOrdinal = column.getHiveColumnIndex();
                 }
