@@ -37,8 +37,12 @@ RUN dnf update -y && dnf --enablerepo=powertools install -y \
         vim \
         wget \
         which \
+<<<<<<< HEAD
         gdb \
         gdb-gdbserver \
+=======
+        lldb \
+>>>>>>> native-worker-image
         openssh-server \
         openssh-clients \
         && \
@@ -47,6 +51,10 @@ RUN dnf update -y && dnf --enablerepo=powertools install -y \
 
 WORKDIR  /app
 COPY --from=Builder /app/presto-native-execution/prestissimo.tar .
+<<<<<<< HEAD
+=======
+COPY . .
+>>>>>>> native-worker-image
 RUN tar xvf prestissimo.tar && \
     mkdir -p /opt/presto-server/etc && \
     mv prestissimo/presto_server /usr/local/bin/ && \
