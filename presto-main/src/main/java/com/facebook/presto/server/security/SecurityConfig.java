@@ -70,7 +70,6 @@ public class SecurityConfig
         return this;
     }
 
-
     public boolean getAllowForwardedHttps()
     {
         return allowForwardedHttps;
