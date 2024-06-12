@@ -26,6 +26,7 @@ import com.google.common.io.Resources;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.ServerSocket;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +35,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.function.BiFunction;
+
 
 import static com.facebook.presto.hive.HiveTestUtils.getProperty;
 import static com.facebook.presto.iceberg.IcebergQueryRunner.createIcebergQueryRunner;
@@ -316,7 +318,7 @@ public class PrestoNativeQueryRunnerUtils
     public static String startRemoteFunctionServer(String remoteFunctionServerBinaryPath)
     {
         try {
-            Path tempDirectoryPath = Files.createTempDirectory("RemoteFunctionServer");
+            Path tempDirectoryPath = Files.createTempDirectory(Paths.get("/tmp"),"RemoteFunctionServer");
             Path remoteFunctionServerUdsPath = tempDirectoryPath.resolve(REMOTE_FUNCTION_UDS);
             log.info("Temp directory for Remote Function Server: %s", tempDirectoryPath.toString());
 
@@ -327,6 +329,27 @@ public class PrestoNativeQueryRunnerUtils
                     .redirectError(ProcessBuilder.Redirect.to(tempDirectoryPath.resolve("thrift_server.err").toFile()))
                     .start();
             return remoteFunctionServerUdsPath.toString();
+        }
+        catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static String startRemoteFunctionRestServer(String remoteFunctionServerBinaryPath)
+    {
+        try {
+            Path tempDirectoryPath = Files.createTempDirectory(Paths.get("/tmp"),"RemoteFunctionRestServer");
+            int port=new ServerSocket(0).getLocalPort();
+            log.info("Temp directory for Remote Function Rest Server: %s", tempDirectoryPath.toString());
+
+            Process p = new ProcessBuilder(Paths.get(remoteFunctionServerBinaryPath).toAbsolutePath().toString(), "--service_port", Integer.toString(port), "--function_prefix", REMOTE_FUNCTION_CATALOG_NAME + ".schema.")
+                    .directory(tempDirectoryPath.toFile())
+                    .redirectErrorStream(true)
+                    .redirectOutput(ProcessBuilder.Redirect.to(tempDirectoryPath.resolve("thrift_server.out").toFile()))
+                    .redirectError(ProcessBuilder.Redirect.to(tempDirectoryPath.resolve("thrift_server.err").toFile()))
+                    .start();
+
+            return String.format("http://127.0.0.1:%d/", port);
         }
         catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -375,11 +398,20 @@ public class PrestoNativeQueryRunnerUtils
 
                         if (remoteFunctionServerUds.isPresent()) {
                             String jsonSignaturesPath = Resources.getResource(REMOTE_FUNCTION_JSON_SIGNATURES).getFile();
-                            configProperties = format("%s%n" +
-                                    "remote-function-server.catalog-name=%s%n" +
-                                    "remote-function-server.thrift.uds-path=%s%n" +
-                                    "remote-function-server.serde=presto_page%n" +
-                                    "remote-function-server.signature.files.directory.path=%s%n", configProperties, REMOTE_FUNCTION_CATALOG_NAME, remoteFunctionServerUds.get(), jsonSignaturesPath);
+                            if (remoteFunctionServerUds.get().startsWith("http")) {
+                                configProperties = format("%s%n" +
+                                        "remote-function-server.catalog-name=%s%n" +
+                                        "remote-function-server.rest.url=%s%n" +
+                                        "remote-function-server.serde=presto_page%n" +
+                                        "remote-function-server.signature.files.directory.path=%s%n", configProperties, REMOTE_FUNCTION_CATALOG_NAME, remoteFunctionServerUds.get(), jsonSignaturesPath);
+
+                            }else{
+                                configProperties = format("%s%n" +
+                                        "remote-function-server.catalog-name=%s%n" +
+                                        "remote-function-server.thrift.uds-path=%s%n" +
+                                        "remote-function-server.serde=presto_page%n" +
+                                        "remote-function-server.signature.files.directory.path=%s%n", configProperties, REMOTE_FUNCTION_CATALOG_NAME, remoteFunctionServerUds.get(), jsonSignaturesPath);
+                            }
                         }
                         Files.write(tempDirectoryPath.resolve("config.properties"), configProperties.getBytes());
                         Files.write(tempDirectoryPath.resolve("node.properties"),
