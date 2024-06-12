@@ -20,6 +20,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+
 #if __has_include("filesystem")
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -287,35 +288,42 @@ folly::Optional<std::string> SystemConfig::discoveryUri() const {
   return optionalProperty(kDiscoveryUri);
 }
 
-folly::Optional<folly::SocketAddress>
+folly::Optional<boost::variant<folly::SocketAddress, proxygen::URL>>
 SystemConfig::remoteFunctionServerLocation() const {
-  // First check if there is a UDS path registered. If there's one, use it.
-  auto remoteServerUdsPath =
-      optionalProperty(kRemoteFunctionServerThriftUdsPath);
-  if (remoteServerUdsPath.hasValue()) {
-    return folly::SocketAddress::makeFromPath(remoteServerUdsPath.value());
+
+  boost::variant<folly::SocketAddress, proxygen::URL> ret;
+  // First check if there is a REST URL
+  auto remoteServerRestURL =
+      optionalProperty(kRemoteFunctionServerRestURL);
+  if (remoteServerRestURL.hasValue()) {
+    ret=proxygen::URL(remoteServerRestURL.value());
+  }else {
+    // check if there is a UDS path registered. If there's one, use it.
+    auto remoteServerUdsPath =
+        optionalProperty(kRemoteFunctionServerThriftUdsPath);
+    if (remoteServerUdsPath.hasValue()) {
+      ret = folly::SocketAddress::makeFromPath(remoteServerUdsPath.value());
+    }
+
+    // Otherwise, check for address and port parameters.
+    auto remoteServerAddress =
+        optionalProperty(kRemoteFunctionServerThriftAddress);
+    auto remoteServerPort =
+        optionalProperty<uint16_t>(kRemoteFunctionServerThriftPort);
+
+    if (remoteServerPort.hasValue()) {
+      // Fallback to localhost if address is not specified.
+      ret = remoteServerAddress.hasValue()
+          ? folly::
+                SocketAddress{remoteServerAddress.value(), remoteServerPort.value()}
+          : folly::SocketAddress{"::1", remoteServerPort.value()};
+    } else if (remoteServerAddress.hasValue()) {
+      VELOX_FAIL(
+          "Remote function server port not provided using '{}'.",
+          kRemoteFunctionServerThriftPort);
+    }
   }
-
-  // Otherwise, check for address and port parameters.
-  auto remoteServerAddress =
-      optionalProperty(kRemoteFunctionServerThriftAddress);
-  auto remoteServerPort =
-      optionalProperty<uint16_t>(kRemoteFunctionServerThriftPort);
-
-  if (remoteServerPort.hasValue()) {
-    // Fallback to localhost if address is not specified.
-    return remoteServerAddress.hasValue()
-        ? folly::
-              SocketAddress{remoteServerAddress.value(), remoteServerPort.value()}
-        : folly::SocketAddress{"::1", remoteServerPort.value()};
-  } else if (remoteServerAddress.hasValue()) {
-    VELOX_FAIL(
-        "Remote function server port not provided using '{}'.",
-        kRemoteFunctionServerThriftPort);
-  }
-
-  // No remote function server configured.
-  return folly::none;
+  return ret;
 }
 
 folly::Optional<std::string>

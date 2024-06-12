@@ -14,6 +14,8 @@
 #pragma once
 
 #include <folly/SocketAddress.h>
+#include <boost/variant.hpp>
+#include <proxygen/lib/utils/URL.h>
 
 namespace facebook::presto {
 
@@ -36,7 +38,7 @@ namespace facebook::presto {
 /// Returns the number of signatures registered.
 size_t registerRemoteFunctions(
     const std::string& inputPath,
-    const folly::SocketAddress& location,
+    const boost::variant<folly::SocketAddress, proxygen::URL>& location,
     const std::string_view& prefix = "",
     const std::string_view& serde = "presto_page");
 
