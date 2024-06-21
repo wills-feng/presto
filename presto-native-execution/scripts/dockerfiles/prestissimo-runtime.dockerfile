@@ -29,7 +29,7 @@ RUN EXTRA_CMAKE_FLAGS=${EXTRA_CMAKE_FLAGS} \
     make -j${NUM_THREADS} --directory="/prestissimo/" cmake-and-build BUILD_TYPE=${BUILD_TYPE} BUILD_DIR=${BUILD_DIR} BUILD_BASE_DIR=${BUILD_BASE_DIR}
 RUN ldd /prestissimo/${BUILD_BASE_DIR}/${BUILD_DIR}/presto_cpp/main/presto_server | awk 'NF == 4 { system("cp " $3 " /runtime-libraries") }'
 
-RUN  ctest -j 8 --output-on-failure --no-tests=error --test-dir /prestissimo/${BUILD_BASE_DIR}/{$BUILD_TYPE}
+RUN  ctest -j 8 --output-on-failure --no-tests=error --test-dir /prestissimo/${BUILD_BASE_DIR}/${BUILD_TYPE}
 
 #/////////////////////////////////////////////
 #          prestissimo-runtime
