@@ -24,6 +24,7 @@ import static com.facebook.presto.nativeworker.PrestoNativeQueryRunnerUtils.REMO
 import static com.facebook.presto.nativeworker.PrestoNativeQueryRunnerUtils.REMOTE_FUNCTION_JSON_SIGNATURES;
 import static com.facebook.presto.nativeworker.PrestoNativeQueryRunnerUtils.setupJsonFunctionNamespaceManager;
 import static com.facebook.presto.nativeworker.PrestoNativeQueryRunnerUtils.startRemoteFunctionServer;
+import static com.facebook.presto.nativeworker.PrestoNativeQueryRunnerUtils.startRemoteFunctionRestServer;
 
 @Test(groups = "remote-function")
 public abstract class AbstractTestNativeRemoteFunctions
@@ -51,7 +52,13 @@ public abstract class AbstractTestNativeRemoteFunctions
         String propertyName = "REMOTE_FUNCTION_SERVER";
         remoteFunctionServerBinaryPath = getProperty(propertyName).orElseThrow(() -> new NullPointerException("Remote function server path missing. Add -DREMOTE_FUNCTION_SERVER=<path/to/binary>" +
                 " to your JVM arguments, or create an environment variable REMOTE_FUNCTION_SERVER with value <path/to/binary>."));
-        remoteFunctionServerUds = startRemoteFunctionServer(remoteFunctionServerBinaryPath);
+
+        String remoteFunctionServerType = "REMOTE_FUNCTION_SERVER_TYPE";
+        if(getProperty(remoteFunctionServerType).isPresent() && getProperty(remoteFunctionServerType).get().equals("REST")){
+            remoteFunctionServerUds = startRemoteFunctionRestServer(remoteFunctionServerBinaryPath);
+        }else {
+            remoteFunctionServerUds = startRemoteFunctionServer(remoteFunctionServerBinaryPath);
+        }
     }
 
     protected void postInitQueryRunners()

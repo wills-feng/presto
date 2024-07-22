@@ -17,6 +17,8 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <boost/variant.hpp>
+#include <proxygen/lib/utils/URL.h>
 #include "velox/core/Config.h"
 
 namespace facebook::presto {
@@ -543,6 +545,10 @@ class SystemConfig : public ConfigBase {
   static constexpr std::string_view kRemoteFunctionServerThriftUdsPath{
       "remote-function-server.thrift.uds-path"};
 
+  /// HTTP URL used by the remote function rest server.
+  static constexpr std::string_view kRemoteFunctionServerRestURL{
+      "remote-function-server.rest.url"};
+
   /// Path where json files containing signatures for remote functions can be
   /// found.
   static constexpr std::string_view
@@ -624,7 +630,7 @@ class SystemConfig : public ConfigBase {
 
   folly::Optional<std::string> discoveryUri() const;
 
-  folly::Optional<folly::SocketAddress> remoteFunctionServerLocation() const;
+  folly::Optional<boost::variant<folly::SocketAddress, proxygen::URL>> remoteFunctionServerLocation() const;
 
   folly::Optional<std::string> remoteFunctionServerSignatureFilesDirectoryPath()
       const;

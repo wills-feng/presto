@@ -18,6 +18,7 @@
 #include "velox/common/base/Exceptions.h"
 #include "velox/common/base/Fs.h"
 #include "velox/functions/remote/client/Remote.h"
+#include <boost/variant.hpp>
 
 namespace facebook::presto {
 namespace {
@@ -50,7 +51,7 @@ PageFormat fromSerdeString(const std::string_view& serdeName) {
 // registered.
 size_t processFile(
     const fs::path& filePath,
-    const folly::SocketAddress& location,
+    const boost::variant<folly::SocketAddress, proxygen::URL>& location,
     const std::string_view& prefix,
     const std::string_view& serde) {
   std::ifstream stream{filePath};
@@ -88,7 +89,7 @@ size_t processFile(
 
 size_t registerRemoteFunctions(
     const std::string& inputPath,
-    const folly::SocketAddress& location,
+    const boost::variant<folly::SocketAddress, proxygen::URL>& location,
     const std::string_view& prefix,
     const std::string_view& serde) {
   size_t signaturesCount = 0;
